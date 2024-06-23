@@ -1,15 +1,28 @@
 import discord
 from discord.ext import commands
+import json
+import os
 
-intents = discord.Intents.default()
-intents.message_content = True
-intents.reactions = True
-bot = commands.Bot(command_prefix='/', intents=intents)
+# Load configuration from config.json
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
-# Replace with your actual channel and server IDs
-GEM_RAFFLE_CHANNEL_ID = 1253431327588487243
-SERVER_ID = 1253407800302899220
+# Retrieve bot token from environment variable
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
+# Check if token is set
+if not DISCORD_TOKEN:
+    print('Error: Discord token not found. Please set DISCORD_TOKEN environment variable.')
+    exit(1)
+
+# Initialize bot with specified prefix
+bot = commands.Bot(command_prefix=config.get('prefix', '/'))
+
+# Constants from config.json
+GEM_RAFFLE_CHANNEL_ID = int(config.get('gem_raffle_channel_id', 1253431327588487243))
+SERVER_ID = int(config.get('server_id', 1253407800302899220))
+
+# Raffle information storage
 raffle_info = {}
 
 @bot.event
@@ -103,4 +116,4 @@ async def stopraffle(ctx):
     else:
         await ctx.send("You can only stop a raffle in its dedicated channel.")
 
-bot.run(os.getenv('DISCORD_TOKEN'))  # Use environment variable for bot token
+bot.run(DISCORD_TOKEN)
